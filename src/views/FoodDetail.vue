@@ -32,11 +32,11 @@
         </div>
         <div class="col-md-6">
           <h4>
-            <strong>{{ product.nama }}</strong>
+            <strong>{{ product.nama }} </strong>
           </h4>
           <hr />
           <h5>
-            Harga : <strong>Rp. {{ product.harga }}</strong>
+            Harga : <strong>Rp. {{ product.harga }} </strong>
           </h5>
           <form class="mt-4" v-on:submit.prevent>
             <div class="form-group">
@@ -67,33 +67,20 @@
 
 <script>
 import Navbar from "../components/Navbar.vue";
-import axios from "axios";
+
+import { mapState } from "vuex";
 
 export default {
   name: "FoodDetail",
   components: { Navbar },
   data() {
-    return { product: {}, pesan: {} };
+    return { pesan: {} };
   },
   methods: {
-    setProduct(data) {
-      this.product = data;
-    },
     pemesanan() {
       if (this.pesan.jumlah_pemesanan) {
-        this.pesan.products = this.product;
-        axios
-          .post("http://localhost:3000/keranjangs", this.pesan)
-          .then(() => {
-            this.$router.push({ path: "/keranjang" });
-            this.$toast.success("Berhasil Masuk Keranjang.", {
-              type: "success",
-              position: "top-right",
-              duration: 3000,
-              dismissible: true,
-            });
-          })
-          .catch((error) => console.log(error));
+        console.log(this.pesan);
+        this.$store.dispatch("pemesanan", { data: "1" });
       } else {
         this.$toast.error("Jumlah pesanan harus diisi.", {
           type: "error",
@@ -105,10 +92,10 @@ export default {
     },
   },
   mounted() {
-    axios
-      .get("http://localhost:3000/products/" + this.$route.params.id)
-      .then((response) => this.setProduct(response.data))
-      .catch((error) => console.log(error));
+    this.$store.dispatch("loadProduct", { id: this.$route.params.id });
+  },
+  computed: {
+    ...mapState(["product", "errorProduct"]),
   },
 };
 </script>

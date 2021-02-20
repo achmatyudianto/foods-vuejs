@@ -33,7 +33,8 @@
 import Navbar from "@/components/Navbar.vue";
 import Hero from "@/components/Hero.vue";
 import CardProduct from "@/components/CardProduct.vue";
-import axios from "axios";
+
+import { mapState } from "vuex";
 
 export default {
   name: "Home",
@@ -42,19 +43,11 @@ export default {
     Hero,
     CardProduct,
   },
-  data() {
-    return { products: [] };
-  },
-  methods: {
-    setProducts(data) {
-      this.products = data;
-    },
-  },
   mounted() {
-    axios
-      .get("http://localhost:3000/best-products")
-      .then((response) => this.setProducts(response.data))
-      .catch((error) => console.log(error));
+    this.$store.dispatch('loadBestProducts');
+  },
+  computed: {
+    ...mapState(["products"]),
   },
 };
 </script>
