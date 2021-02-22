@@ -1,6 +1,6 @@
 <template>
   <div class="keranjang">
-    <Navbar :updateKeranjang="keranjangs" />
+    <Navbar />
     <div class="container">
       <!-- breadcrumb -->
       <div class="row mt-5">
@@ -32,43 +32,70 @@
                   <th scope="col">Foto</th>
                   <th scope="col">Makanan</th>
                   <th scope="col">keteranan</th>
-                  <th scope="col" class="text-center">Jumlah</th>
                   <th scope="col" class="text-right">Harga</th>
+                  <th scope="col" class="text-center">Jumlah</th>
                   <th scope="col" class="text-right">Total Harga</th>
                   <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="(keranjang, index) in keranjangs"
+                  v-for="(keranjang, index) in allKeranjangs"
                   :key="keranjang.id"
                 >
                   <th scope="row">{{ index + 1 }}</th>
                   <td>
                     <img
-                      :src="'../assets/images/' + keranjang.products.gambar"
+                      :src="'../assets/images/' + keranjang.product.gambar"
                       alt=""
                       class="img-fluid shadow"
                       width="150"
                     />
                   </td>
-                  <td>{{ keranjang.products.nama }}</td>
+                  <td>{{ keranjang.product.nama }}</td>
                   <td>
                     {{ keranjang.keterangan ? keranjang.keterangan : "-" }}
                   </td>
-                  <td align="center">{{ keranjang.jumlah_pemesanan }}</td>
-                  <td align="right">Rp. {{ keranjang.products.harga }}</td>
+                  <td align="right">Rp. {{ keranjang.product.harga }}</td>
+                  <td align="center" width="150">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span
+                          class="input-group-text"
+                          @click="
+                            updateJumlah({ keranjang: keranjang, type: 0 })
+                          "
+                          >-</span
+                        >
+                      </div>
+                      <input
+                        type="text"
+                        class="form-control text-center"
+                        :value="keranjang.jumlah_pemesanan"
+                        disabled
+                      />
+                      <div class="input-group-prepend">
+                        <span
+                          class="input-group-text"
+                          @click="
+                            updateJumlah({ keranjang: keranjang, type: 1 })
+                          "
+                          >+</span
+                        >
+                      </div>
+                    </div>
+                  </td>
                   <td align="right">
                     <strong
                       >Rp.
                       {{
-                        keranjang.jumlah_pemesanan * keranjang.products.harga
+                        keranjang.jumlah_pemesanan * keranjang.product.harga
                       }}</strong
                     >
                   </td>
                   <td align="center" class="text-danger">
                     <b-icon-trash
-                      @click="hapusKeranjang(keranjang.id)"
+                      @click="deleteKeranjang({ vm: $toast, id: keranjang.id })"
                     ></b-icon-trash>
                   </td>
                 </tr>
@@ -114,7 +141,8 @@
 
 <script>
 import Navbar from "@/components/Navbar.vue";
-import axios from "axios";
+
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "Keranjang",
@@ -122,53 +150,18 @@ export default {
     Navbar,
   },
   data() {
-    return { keranjangs: [], pesan: {} };
+    return { pesan: {} };
   },
   methods: {
-    setKeranjangs(data) {
-      this.keranjangs = data;
-    },
-    hapusKeranjang(id) {
-      axios
-        .delete("http://localhost:3000/keranjangs/" + id)
-        .then(() => {
-          this.$toast.error("Keranjang dihapus", {
-            type: "error",
-            position: "top-right",
-            duration: 3000,
-            dismissible: true,
-          });
-
-          // Update keranjangs
-          axios
-            .get("http://localhost:3000/keranjangs")
-            .then((response) => this.setKeranjangs(response.data))
-            .catch((error) => console.log(error));
-        })
-        .catch((error) => console.log(error));
-    },
+    ...mapActions([
+      "fetchKeranjangs",
+      "deleteKeranjang",
+      "checkoutAll",
+      "updateJumlah",
+    ]),
     checkout() {
       if (this.pesan.nama && this.pesan.noMeja) {
-        this.pesan.keranjangs = this.keranjangs;
-        axios
-          .post("http://localhost:3000/pesanans", this.pesan)
-          .then(() => {
-            // hapus Seemua Keranjang
-            this.keranjangs.map(function(item) {
-              return axios
-                .delete("http://localhost:3000/keranjangs/" + item.id)
-                .catch((error) => console.log(error));
-            });
-
-            this.$router.push({ path: "pesanan-sukses" });
-            this.$toast.success("Berhasil Di Pesan.", {
-              type: "success",
-              position: "top-right",
-              duration: 3000,
-              dismissible: true,
-            });
-          })
-          .catch((error) => console.log(error));
+        this.checkoutAll({ vm: this, pesan: this.pesan });
       } else {
         this.$toast.error("Nama dan No Meja harus di isi", {
           type: "error",
@@ -179,18 +172,9 @@ export default {
       }
     },
   },
-  mounted() {
-    axios
-      .get("http://localhost:3000/keranjangs")
-      .then((response) => this.setKeranjangs(response.data))
-      .catch((error) => console.log(error));
-  },
-  computed: {
-    totalHarga() {
-      return this.keranjangs.reduce(function(items, data) {
-        return items + data.products.harga * data.jumlah_pemesanan;
-      }, 0);
-    },
+  computed: mapGetters(["allKeranjangs", "totalHarga"]),
+  created() {
+    this.fetchKeranjangs();
   },
 };
 </script>

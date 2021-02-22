@@ -18,7 +18,7 @@
       <div class="row mb-3">
         <div
           class="col-md-3 mt-4"
-          v-for="product in products"
+          v-for="product in allProducts"
           :key="product.id"
         >
           <CardProduct :product="product" />
@@ -34,7 +34,7 @@ import Navbar from "@/components/Navbar.vue";
 import Hero from "@/components/Hero.vue";
 import CardProduct from "@/components/CardProduct.vue";
 
-import { mapState } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "Home",
@@ -43,11 +43,12 @@ export default {
     Hero,
     CardProduct,
   },
-  mounted() {
-    this.$store.dispatch('loadBestProducts');
+  methods: {
+    ...mapActions(["fetchBestProducts"]),
   },
-  computed: {
-    ...mapState(["products"]),
+  computed: mapGetters(["allProducts"]),
+  created() {
+    this.fetchBestProducts();
   },
 };
 </script>

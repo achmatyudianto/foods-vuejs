@@ -19,11 +19,7 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/keranjang"
                 >Keranjang <b-icon-bag></b-icon-bag>
-                <span class="badge badge-success">{{
-                  updateKeranjang
-                    ? updateKeranjang.length
-                    : jumlah_pesanans.length
-                }}</span></router-link
+                <span class="badge badge-success">{{ bag }}</span></router-link
               >
             </li>
           </b-navbar-nav>
@@ -34,25 +30,11 @@
 </template>
 
 <script>
-import axios from "axios";
+import { mapGetters } from "vuex";
 
 export default {
   name: "Navbar",
-  props: ["updateKeranjang"],
-  data() {
-    return { jumlah_pesanans: [] };
-  },
-  methods: {
-    setJumlah(data) {
-      this.jumlah_pesanans = data;
-    },
-  },
-  mounted() {
-    axios
-      .get("http://localhost:3000/keranjangs")
-      .then((response) => this.setJumlah(response.data))
-      .catch((error) => console.log(error));
-  },
+  computed: mapGetters(["bag"]),
 };
 </script>
 

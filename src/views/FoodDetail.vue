@@ -38,7 +38,7 @@
           <h5>
             Harga : <strong>Rp. {{ product.harga }} </strong>
           </h5>
-          <form class="mt-4" v-on:submit.prevent>
+          <form class="mt-4" v-on:submit.prevent @submit="pemesanan">
             <div class="form-group">
               <label for="jumlah-pesanan">Jumlah Pesanan</label>
               <input
@@ -55,7 +55,7 @@
                 placeholder="Keterangan spr : Pedas, Tikak Pedas, Nasi Setengah ..."
               ></textarea>
             </div>
-            <button type="submit" class="btn btn-success" @click="pemesanan">
+            <button type="submit" class="btn btn-success">
               <b-icon-cart></b-icon-cart> Pesan
             </button>
           </form>
@@ -68,7 +68,7 @@
 <script>
 import Navbar from "../components/Navbar.vue";
 
-import { mapState } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "FoodDetail",
@@ -77,10 +77,11 @@ export default {
     return { pesan: {} };
   },
   methods: {
+    ...mapActions(["detailProduct", "addPemesanan"]),
     pemesanan() {
       if (this.pesan.jumlah_pemesanan) {
-        console.log(this.pesan);
-        this.$store.dispatch("pemesanan", { data: "1" });
+        this.pesan.product = this.product;
+        this.addPemesanan({ vm: this, pesan: this.pesan });
       } else {
         this.$toast.error("Jumlah pesanan harus diisi.", {
           type: "error",
@@ -91,11 +92,9 @@ export default {
       }
     },
   },
-  mounted() {
-    this.$store.dispatch("loadProduct", { id: this.$route.params.id });
-  },
-  computed: {
-    ...mapState(["product", "errorProduct"]),
+  computed: mapGetters(["product"]),
+  created() {
+    this.detailProduct(this.$route.params.id);
   },
 };
 </script>
