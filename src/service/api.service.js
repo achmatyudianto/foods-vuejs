@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/";
+const URL_BASE = "http://localhost:3000/";
 
 // GET DaTA
 function getData(url, cb) {
   axios
-    .get(BASE_URL + url)
+    .get(URL_BASE + url)
     .then((response) => {
       cb(response);
     })
@@ -17,7 +17,7 @@ function getData(url, cb) {
 // POST DATA
 function postData(url, data, cb) {
   axios
-    .post(BASE_URL + url, data)
+    .post(URL_BASE + url, data)
     .then((response) => {
       cb(response);
     })
@@ -29,7 +29,7 @@ function postData(url, data, cb) {
 // DELETE DATA
 function deleteData(url, cb) {
   axios
-    .delete(BASE_URL + url)
+    .delete(URL_BASE + url)
     .then((response) => {
       cb(response);
     })
@@ -41,7 +41,7 @@ function deleteData(url, cb) {
 // UPDATE DATA
 function putData(url, data, cb) {
   axios
-    .put(BASE_URL + url, data)
+    .put(URL_BASE + url, data)
     .then((response) => {
       cb(response);
     })
