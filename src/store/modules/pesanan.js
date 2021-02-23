@@ -1,5 +1,5 @@
-import axios from "axios";
-import api from "../../service/url.service.js";
+import api from "../../service/api.service";
+
 const state = {
   keranjangs: [],
 };
@@ -19,20 +19,20 @@ const getters = {
 };
 
 const actions = {
-  //all keranjangs
+  // all keranjangs
   async fetchKeranjangs({ commit }) {
-    axios
-      .get(api.url() + "keranjangs")
-      .then((response) => {
+    api.getData("keranjangs", (response) => {
+      if (response.status === 200) {
         commit("setKeranjangs", response.data);
-      })
-      .catch((error) => console.log(error));
+      } else {
+        console.log(response);
+      }
+    });
   },
-  // delete keranjangs
+  // delete keranjang
   async deleteKeranjang({ commit }, { vm, id }) {
-    axios
-      .delete(api.url() + "keranjangs/" + id)
-      .then(() => {
+    api.deleteData("keranjangs/" + id, (response) => {
+      if (response.status === 200) {
         commit("deleteKeranjang", id);
         vm.error("Keranjang dihapus", {
           type: "error",
@@ -40,14 +40,15 @@ const actions = {
           duration: 3000,
           dismissible: true,
         });
-      })
-      .catch((error) => console.log(error));
+      } else {
+        console.log(response);
+      }
+    });
   },
-  //pemesanan
+  // pemesanan
   async addPemesanan({ commit }, { vm, pesan }) {
-    axios
-      .post(api.url() + "keranjangs", pesan)
-      .then((response) => {
+    api.postData("keranjangs", pesan, (response) => {
+      if (response.status === 201) {
         commit("addKeranjangs", response.data);
         vm.$toast.success("Berhasil di Pesan", {
           type: "success",
@@ -55,45 +56,43 @@ const actions = {
           duration: 3000,
           dismissible: true,
         });
-      })
-      .catch((error) => console.log(error));
+      } else {
+        console.log(response);
+      }
+    });
   },
-  //edit jumlah pesanan
+  // edit jumlah pesanan
   async updateJumlah({ commit }, { keranjang, type }) {
     if (type === 1) {
       keranjang.jumlah_pemesanan = parseInt(keranjang.jumlah_pemesanan) + 1;
     } else {
       keranjang.jumlah_pemesanan = parseInt(keranjang.jumlah_pemesanan) - 1;
     }
-    axios
-      .put(api.url() + "keranjangs/" + keranjang.id, keranjang)
-      .then((response) => {
+    api.putData("keranjangs/" + keranjang.id, keranjang, (response) => {
+      if (response.status === 200) {
         commit("updateKeranjang", response.data);
-      })
-      .catch((error) => console.log(error));
+      } else {
+        console.log(response);
+      }
+    });
   },
   // checkout
   async checkoutAll({ commit }, { vm, pesan }) {
     pesan.keranjangs = state.keranjangs;
-    axios
-      .post(api.url() + "pesanans", pesan)
-      .then(() => {
-        // hapus Seemua Keranjang
-        state.keranjangs.map(function(item) {
-          return axios
-            .delete(api.url() + "keranjangs/" + item.id)
-            .catch((error) => console.log(error));
-        });
-        commit("setKeranjangs", []);
-        vm.$router.push({ path: "pesanan-sukses" });
-        vm.$toast.success("Berhasil Di Pesan.", {
-          type: "success",
-          position: "top-right",
-          duration: 3000,
-          dismissible: true,
-        });
-      })
-      .catch((error) => console.log(error));
+    api.postData("pesanans", pesan, () => {
+      //hapus semua keranjangs
+      state.keranjangs.map((item) => {
+        return api.deleteData("keranjangs/" + item.id);
+      });
+      commit("setKeranjangs", []);
+      vm.$router.push({ path: "pesanan-sukses" });
+      vm.$toast.success("Berhasil Di Pesan.", {
+        type: "success",
+        position: "top-right",
+        duration: 3000,
+        dismissible: true,
+      });
+    });
   },
 };
 

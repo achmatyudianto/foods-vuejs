@@ -1,5 +1,4 @@
-import axios from "axios";
-import api from "../../service/url.service.js";
+import api from "../../service/api.service";
 
 const state = {
   products: [],
@@ -16,41 +15,45 @@ const getters = {
 };
 
 const actions = {
-  //best product
+  // best product
   async fetchBestProducts({ commit }) {
-    axios
-      .get(api.url() + "best-products")
-      .then((response) => {
+    api.getData("best-products", (response) => {
+      if (response.status === 200) {
         commit("setProducts", response.data);
-      })
-      .catch((error) => console.log(error));
+      } else {
+        console.log(response);
+      }
+    });
   },
   // all product
   async fetchProducts({ commit }) {
-    axios
-      .get(api.url() + "products")
-      .then((response) => {
+    api.getData("products", (response) => {
+      if (response.status === 200) {
         commit("setProducts", response.data);
-      })
-      .catch((error) => console.log(error));
-  },
-  // detail Product
-  async detailProduct({ commit }, id) {
-    axios
-      .get(api.url() + "products/" + id)
-      .then((response) => {
-        commit("setProduct", response.data);
-      })
-      .catch((error) => console.log(error));
+      } else {
+        console.log(response);
+      }
+    });
   },
   // search product
   async searchProduct({ commit }, event) {
-    axios
-      .get(api.url() + "products?q=" + event.target.value)
-      .then((response) => {
+    api.getData("products?q=" + event.target.value, (response) => {
+      if (response.status === 200) {
         commit("setProducts", response.data);
-      })
-      .catch((error) => console.log(error));
+      } else {
+        console.log(response);
+      }
+    });
+  },
+  // detail Product
+  async detailProduct({ commit }, id) {
+    api.getData("products/" + id, (response) => {
+      if (response.status === 200) {
+        commit("setProduct", response.data);
+      } else {
+        console.log(response);
+      }
+    });
   },
 };
 
